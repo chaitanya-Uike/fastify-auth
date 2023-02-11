@@ -1,4 +1,8 @@
-const { loginController, registerController } = require("../controllers/auth");
+const {
+  loginController,
+  registerController,
+  getToken,
+} = require("../controllers/auth");
 
 const registerOpts = {
   schema: {
@@ -29,6 +33,9 @@ const registerOpts = {
         access_token: {
           type: "string",
         },
+        refresh_token: {
+          type: "string",
+        },
       },
     },
   },
@@ -47,6 +54,34 @@ const loginOpts = {
           type: "string",
         },
       },
+      required: ["email", "password"],
+    },
+  },
+  response: {
+    200: {
+      type: "object",
+      properties: {
+        access_token: {
+          type: "string",
+        },
+        refresh_token: {
+          type: "string",
+        },
+      },
+    },
+  },
+};
+
+const tokenopts = {
+  schema: {
+    body: {
+      type: "object",
+      properties: {
+        refresh_token: {
+          type: "string",
+        },
+      },
+      required: ["refresh_token"],
     },
   },
   response: {
@@ -63,8 +98,8 @@ const loginOpts = {
 
 function authRoute(fastify, options, done) {
   fastify.post("/register", registerOpts, registerController);
-
   fastify.post("/login", loginOpts, loginController);
+  fastify.post("/token", tokenopts, getToken);
 
   done();
 }

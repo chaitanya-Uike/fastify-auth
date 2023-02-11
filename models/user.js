@@ -6,11 +6,12 @@ module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     getToken() {
       const payload = { userId: this.id, username: this.username };
-      const token = JWT.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "30s",
+      const access_token = JWT.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "15s",
       });
+      const refresh_token = JWT.sign(payload, process.env.REFRESH_TOKEN_SECRET);
 
-      return token;
+      return { access_token, refresh_token };
     }
 
     async comparePassword(candidatePassword) {
@@ -18,7 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       return isMatch;
     }
 
-    static associate(models) {}
+    static associate(models) {
+      User.hasMany(models.Task);
+    }
   }
   User.init(
     {

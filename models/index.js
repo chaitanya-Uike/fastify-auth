@@ -13,6 +13,7 @@ const sequelize = new Sequelize(
 
 const models = {
   User: require("./user")(sequelize, Sequelize.DataTypes),
+  Task: require("./task")(sequelize, Sequelize.DataTypes),
 };
 
 Object.keys(models).forEach((modelName) => {
