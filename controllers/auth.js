@@ -1,5 +1,5 @@
-const models = require("../../models");
-const redisClient = require("../../db/redis");
+const models = require("../models");
+const redisClient = require("../config/redis");
 const JWT = require("jsonwebtoken");
 
 async function registerController(request, reply) {
@@ -7,7 +7,12 @@ async function registerController(request, reply) {
     const user = await models.User.create({ ...request.body });
     const { access_token, refresh_token } = user.getToken();
     // expire after 30 days
-    redisClient.set(refresh_token, 1, "EX", 60 * 60 * 24 * 30);
+    redisClient.set(
+      refresh_token,
+      1,
+      "EX",
+      process.env.REFRESH_TOKEN_EXPIRY || 60 * 60 * 24 * 30
+    );
 
     return reply.status(201).send({ access_token, refresh_token });
   } catch (error) {
@@ -37,7 +42,12 @@ async function loginController(request, reply) {
 
     const { access_token, refresh_token } = user.getToken();
     // expire after 30 days
-    redisClient.set(refresh_token, 1, "EX", 60 * 60 * 24 * 30);
+    redisClient.set(
+      refresh_token,
+      1,
+      "EX",
+      process.env.REFRESH_TOKEN_EXPIRY || 60 * 60 * 24 * 30
+    );
 
     reply.status(200).send({ access_token, refresh_token });
   } catch (error) {
@@ -48,6 +58,7 @@ async function loginController(request, reply) {
   }
 }
 
+// using the refresh_token to get a fresh access_token
 async function getToken(request, reply) {
   try {
     const { refresh_token } = request.body;
